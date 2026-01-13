@@ -1,4 +1,4 @@
-# 🤖 TechCorp AI - Multi-Department RAG Chatbot
+# 🤖 Cambot AI - Multi-Department RAG Chatbot
 
 ![Cambot AI](https://placehold.co/600x400?text=Cambot+AI+Dashboard)
 
