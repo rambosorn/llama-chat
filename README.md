@@ -3,7 +3,7 @@
 <img width="2880" height="1470" alt="image" src="https://github.com/user-attachments/assets/0c538d09-0299-41f0-ac2f-a215a412add9" />
 
 
-TechCorp AI is an **advanced RAG (Retrieval-Augmented Generation) Chatbot** designed for enterprise environments. It features a "Router & Expert" architecture that intelligently classifies user queries and routes them to specialized departmental agents (HR, Sales, Finance, IT) for accurate, context-aware answers.
+Cambot AI AI is an **advanced RAG (Retrieval-Augmented Generation) Chatbot** designed for enterprise environments. It features a "Router & Expert" architecture that intelligently classifies user queries and routes them to specialized departmental agents (HR, Sales, Finance, IT) for accurate, context-aware answers.
 
 ## ✨ Key Features
 
