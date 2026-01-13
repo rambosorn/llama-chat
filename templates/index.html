@@ -68,6 +68,134 @@
             border-right: 1px solid var(--border);
             flex-shrink: 0;
             transition: background-color 0.3s, border-color 0.3s;
+            z-index: 50;
+        }
+
+        /* --- MOBILE NAV --- */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--bg-body);
+            border-bottom: 1px solid var(--border);
+            z-index: 40;
+            align-items: center;
+            padding: 0 1rem;
+            justify-content: space-between;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-brand {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-main);
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 45;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            aside {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 260px;
+                /* Wider drawer like GPT */
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                align-items: flex-start;
+                /* Align left for drawer feel */
+                padding: 1.5rem;
+            }
+
+            aside.open {
+                transform: translateX(0);
+                box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
+            }
+
+            /* Adjust internal sidebar items for drawer look */
+            aside .brand-logo {
+                margin-bottom: 2rem;
+                margin-left: 0.5rem;
+            }
+
+            aside .nav-item {
+                width: 100%;
+                justify-content: flex-start;
+                padding-left: 1rem;
+                border-radius: 8px;
+            }
+
+            aside .nav-item span {
+                margin-right: 1rem;
+            }
+
+            /* Show Mobile Header */
+            .mobile-header {
+                display: flex;
+            }
+
+            /* Main Content Pushed down */
+            main {
+                margin-top: 60px;
+                height: calc(100vh - 60px);
+            }
+
+            /* Popovers fix for mobile drawer */
+            .popover-menu {
+                left: 20px;
+                width: 220px;
+                position: relative;
+                /* Inside flow */
+                box-shadow: none;
+                background: rgba(0, 0, 0, 0.05);
+                /* Subtle nested bg */
+                border: none;
+                margin-top: 5px;
+            }
+
+            #profileMenu {
+                bottom: auto;
+                top: 0;
+            }
+
+            #settingsMenu {
+                bottom: auto;
+                top: 0;
+            }
         }
 
         .brand-logo {
@@ -517,8 +645,19 @@
 </head>
 
 <body>
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <button class="menu-btn" onclick="toggleMobileMenu()">
+            <span class="material-icons-round" style="font-size: 28px;">menu</span>
+        </button>
+        <div class="mobile-brand">Cambot AI 🤖</div>
+        <div style="width: 28px;"></div> <!-- Spacer for balance -->
+    </div>
 
-    <aside>
+    <!-- Dark Overlay -->
+    <div class="overlay" id="sidebarOverlay" onclick="toggleMobileMenu()"></div>
+
+    <aside id="sidebar">
         <div class="brand-logo">
             <span class="material-icons-round">auto_awesome</span>
         </div>
@@ -692,6 +831,18 @@
                 sMenu.classList.remove('show');
             }
         });
+
+        // --- MOBILE NAV ---
+        function toggleMobileMenu() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            if (sidebar.classList.contains('open')) {
+                overlay.classList.add('show');
+            } else {
+                overlay.classList.remove('show');
+            }
+        }
 
         // --- CHAT LOGIC ---
         function switchToChat() {
