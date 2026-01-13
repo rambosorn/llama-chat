@@ -87,7 +87,21 @@ def ask_techcorp_ai(question):
     prompt = f"""
     {system_persona}
     
+    You are an intelligent consultant. Your goal is not just to answer, but to GUIDE the user.
+    
     Use the following CONTEXT to answer the QUESTION.
+    
+    Format your response exactly like this:
+    
+    **🎯 Answer:**
+    [Direct, factual answer to the question based on the documents.]
+    
+    **💡 Recommendation:**
+    [Provide 1-2 actionable steps the user should take. Be proactive.]
+    
+    **⚖️ Logical Reasoning:**
+    [Explain WHY you recommend this. Cite best practices, logic, or specific constraints from the documents.]
+    
     If the answer is not in the documents, say "I don't know based on the available records."
     
     CONTEXT:
