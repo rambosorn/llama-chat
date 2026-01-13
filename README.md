@@ -58,6 +58,46 @@ python app.py
 ```
 Visit `http://localhost:5000` in your browser.
 
+## 🏗️ System Architecture
+
+```mermaid
+graph TD
+    User[User] -->|HTTP POST| Flask[Flask Backend]
+    Flask -->|Query| Router[🤖 Intent Router]
+    
+    subgraph "Intelligent Agents & Knowledge Base"
+        Router -->|IT Query| IT[🖥️ IT Agent]
+        Router -->|HR Query| HR[⚖️ HR Agent]
+        Router -->|Finance Query| Fin[💰 Finance Agent]
+        Router -->|Complex Query| Exec[🎩 Executive Agent]
+        
+        IT -->|Retrieve| ITDocs[(📂 IT Docs)]
+        HR -->|Retrieve| HRDocs[(📂 HR Docs)]
+        Fin -->|Retrieve| FinDocs[(📂 Finance Docs)]
+        Exec -->|Retrieve| AllDocs[(🌍 Global Docs)]
+    end
+    
+    IT & HR & Fin & Exec -->|Context + Prompt| LLM[🧠 Ollama LLM]
+    LLM -->|Answer| Flask
+    Flask -->|JSON| User
+```
+
+## 🛡️ Safety Guardrails & "Ground Rules"
+
+To ensure the AI remains secure, accurate, and helpful in an enterprise setting, we enforce the following **Ground Rules**:
+
+1.  **Scoped Knowledge Access**:
+    *   Agents are restricted to their own department's data (e.g., The Sales Agent *cannot* access HR salary files).
+    *   *Exception:* The Executive Agent has global access but is only triggered for high-level strategic queries.
+2.  **No Hallucination Policy**:
+    *   The System Prompt explicitly instructs the AI: *"If the answer is not in the documents, say you don't know."*
+    *   It cites sources (filenames) for every answer.
+3.  **Role-Based Personas**:
+    *   Agents adopt strict personas. The **IT Agent** speaks technically, while the **HR Agent** speaks formally and policy-focused.
+4.  **Credential Isolation**:
+    *   No sensitive keys or passwords are stored in the codebase. All secrets are loaded from environment variables (`.env`).
+
+
 ## 📂 Project Structure
 
 ```
