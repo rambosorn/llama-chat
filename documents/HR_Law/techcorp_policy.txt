@@ -1,0 +1,14 @@
+TechCorp Employee Handbook & Security Policy
+Version: 2025.1
+
+1. ID Badges
+All employees must wear their ID badges at all times while on company premises. Lost badges must be reported to Security immediately.
+
+2. Remote Work Policy
+TechCorp embraces flexibility. Employees are permitted to work remotely on Fridays, provided they have manager approval and high-speed internet access.
+
+3. AI & Data Usage
+The use of external AI tools (e.g., ChatGPT, Claude) for company code or confidential data is STRICTLY PROHIBITED unless using the internal "TechCorp AI" sandbox. Data leakage is a fireable offense.
+
+4. Working Hours
+Core hours are 10:00 AM to 3:00 PM. Employees are expected to be available during these times regardless of their time zone.

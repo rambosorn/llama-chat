@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ខេមបត (Cambot)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+        /* --- CSS VARIABLES & THEMES --- */
+        :root {
+            /* Light Theme (Default) */
+            --bg-body: #f8f9fd;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --text-main: #2d3436;
+            --text-sub: #636e72;
+            --border: #dfe6e9;
+            --input-bg: #ffffff;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+
+            --purple: #6c5ce7;
+            --purple-light: #a29bfe;
+            --white: #ffffff;
+        }
+
+        body.dark-mode {
+            /* Dark Theme */
+            --bg-body: #1e1e2e;
+            /* Deep Blue-Grey */
+            --bg-sidebar: #252538;
+            /* Slightly lighter */
+            --bg-card: #2f2f45;
+            --text-main: #e0e0e0;
+            --text-sub: #b2bec3;
+            --border: #404055;
+            --input-bg: #2f2f45;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-body);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            color: var(--text-main);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* --- SIDEBAR --- */
+        aside {
+            width: 80px;
+            background-color: var(--bg-sidebar);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 0;
+            border-right: 1px solid var(--border);
+            flex-shrink: 0;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 3rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            color: var(--text-sub);
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background-color: var(--border);
+            /* Subtle hover */
+            color: var(--purple);
+        }
+
+        .nav-item.active {
+            background-color: var(--purple);
+            color: white;
+            box-shadow: 0 4px 10px rgba(108, 92, 231, 0.3);
+            margin-top: 1rem;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ffeaa7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2d3436;
+            /* Always dark text on yellow */
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .profile-pic:hover {
+            transform: scale(1.05);
+        }
+
+        /* Profile Menu & Settings Modal */
+        .popover-menu {
+            display: none;
+            position: absolute;
+            left: 70px;
+            /* To the right of sidebar */
+            width: 200px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            z-index: 1000;
+            flex-direction: column;
+            overflow: hidden;
+            animation: fadeIn 0.1s ease-out;
+        }
+
+        .popover-menu.show {
+            display: flex;
+        }
+
+        /* Profile Specific Positioning */
+        #profileMenu {
+            bottom: 20px;
+        }
+
+        /* Settings Specific Positioning */
+        #settingsMenu {
+            bottom: 80px;
+        }
+
+        .menu-header {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            background: var(--bg-body);
+        }
+
+        .menu-item {
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            text-decoration: none;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .menu-item:hover {
+            background: var(--border);
+        }
+
+        .menu-item.logout {
+            color: #ff4d4d;
+        }
+
+        /* Toggle Switch */
+        .toggle-row {
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-main);
+            font-size: 0.9rem;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 20px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--purple);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(14px);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- MAIN AREA --- */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-body);
+        }
+
+        /* Initial "Home" State */
+        .hero-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            overflow-y: auto;
+            transition: opacity 0.3s;
+        }
+
+        .greeting-area {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .avatar-lg {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+            border-radius: 50%;
+            margin: 0 auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 10px 25px rgba(108, 92, 231, 0.2);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--text-main);
+            /* Updated */
+            margin: 0;
+        }
+
+        p.subtitle {
+            color: var(--text-sub);
+            /* Updated */
+            margin-top: 0.5rem;
+        }
+
+        /* Input Card Style */
+        .search-card {
+            background: var(--bg-card);
+            /* Updated */
+            width: 100%;
+            max-width: 800px;
+            padding: 1.5rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            /* Updated */
+            position: relative;
+            transition: background 0.3s, border 0.3s;
+        }
+
+        .search-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            color: var(--text-sub);
+            font-size: 0.9rem;
+        }
+
+        textarea {
+            width: 100%;
+            border: none;
+            resize: none;
+            font-family: inherit;
+            font-size: 1.1rem;
+            outline: none;
+            color: var(--text-main);
+            /* Updated */
+            background: transparent;
+            min-height: 80px;
+        }
+
+        textarea::placeholder {
+            color: var(--border);
+        }
+
+        .search-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            border-top: 1px solid var(--border);
+            /* Updated */
+            padding-top: 1rem;
+        }
+
+        .char-count {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        .send-btn-square {
+            width: 40px;
+            height: 40px;
+            background-color: var(--purple);
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.1s;
+        }
+
+        .send-btn-square:hover {
+            transform: scale(1.05);
+        }
+
+        /* Recent Chats Row */
+        .recent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 800px;
+            margin-top: 3rem;
+        }
+
+        .chat-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        .chat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .card-icon {
+            color: var(--text-sub);
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .card-time {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+        }
+
+
+        /* --- ACTIVE CHAT STATE --- */
+        .chat-interface {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .msg-container {
+            display: flex;
+            gap: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .msg-container.user {
+            flex-direction: row-reverse;
+        }
+
+        .msg-bubble {
+            background: var(--bg-card);
+            /* Updated */
+            padding: 1.5rem;
+            border-radius: 16px;
+            border-top-left-radius: 2px;
+            box-shadow: var(--shadow);
+            line-height: 1.6;
+            color: var(--text-main);
+            /* Updated */
+            border: 1px solid var(--border);
+            /* Subtle border for dark mode contrast */
+        }
+
+        .msg-container.user .msg-bubble {
+            background: var(--purple);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            border-top-right-radius: 2px;
+        }
+
+        .avatar-sm {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .ai-av {
+            background: linear-gradient(135deg, #a29bfe, #6c5ce7);
+            color: white;
+        }
+
+        .user-av {
+            background: #ffeaa7;
+            color: #2d3436;
+        }
+
+        .bottom-input-container {
+            padding: 2rem;
+            /* Gradient fade needs to adapt to theme? For now simple solid or transparent */
+            background: linear-gradient(to top, var(--bg-body) 80%, transparent);
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside>
+        <div class="brand-logo">
+            <span class="material-icons-round">auto_awesome</span>
+        </div>
+
+        <a href="/" class="nav-item active">
+            <span class="material-icons-round">add</span>
+        </a>
+
+        <div class="spacer"></div>
+
+        <div class="nav-item">
+            <span class="material-icons-round">help_outline</span>
+        </div>
+
+        <!-- Settings Trigger -->
+        <div class="nav-item" onclick="toggleSettingsMenu()">
+            <span class="material-icons-round">settings</span>
+        </div>
+        <!-- Settings Modal (Popover) -->
+        <div id="settingsMenu" class="popover-menu">
+            <div class="menu-header">Settings</div>
+            <div class="toggle-row">
+                <span>Dark Mode 🌙</span>
+                <label class="switch">
+                    <input type="checkbox" id="darkModeToggle" onchange="toggleTheme()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div style="position: relative;">
+            <div class="profile-pic" onclick="toggleProfileMenu()">{{ username[0]|upper }}</div>
+            <div id="profileMenu" class="popover-menu">
+                <div class="menu-header">
+                    {{ username }}
+                    <div style="font-size: 0.75rem; color: var(--text-sub); font-weight: 400;">Personal Plan</div>
+                </div>
+                <a href="/logout" class="menu-item logout">
+                    <span class="material-icons-round" style="font-size: 1.2rem;">logout</span>
+                    Log Out
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <main>
+        <!-- INITIAL HERO SCREEN -->
+        <div class="hero-section" id="heroSection">
+            <div class="greeting-area">
+                <div class="avatar-lg">{{ username[0]|upper }}</div>
+                <h1>Good Evening, {{ username }}</h1>
+                <p class="subtitle">Enter a simple prompt to find what’s on your mind today?</p>
+            </div>
+
+            <div class="search-card">
+                <div class="search-header">
+                    <span style="display:flex; align-items:center; gap:5px; color:var(--purple); font-weight:600;">
+                        <span class="material-icons-round" style="font-size: 1rem;">auto_awesome</span>
+                        Ask whatever you want
+                    </span>
+                </div>
+
+                <textarea id="heroInput" placeholder="How much is the budget for Project Pegasus?"></textarea>
+
+                <div class="search-footer">
+                    <div style="flex: 1;"></div>
+                    <div style="display:flex; align-items:center; gap: 1rem;">
+                        <span class="char-count">0/1000</span>
+                        <button class="send-btn-square" onclick="sendHeroMessage()">
+                            <span class="material-icons-round">send</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="recent-grid">
+                <div class="chat-card">
+                    <div class="card-icon"><span class="material-icons-round">chat_bubble_outline</span></div>
+                    <div class="card-title">Project Pegasus Budget</div>
+                    <div class="card-time">2 Hours ago</div>
+                </div>
+                <div class="chat-card">
+                    <div class="card-icon"><span class="material-icons-round">chat_bubble_outline</span></div>
+                    <div class="card-title">HR Sick Leave Policy</div>
+                    <div class="card-time">5 Hours ago</div>
+                </div>
+                <div class="chat-card">
+                    <div class="card-icon"><span class="material-icons-round">chat_bubble_outline</span></div>
+                    <div class="card-title">Q3 Financial Results</div>
+                    <div class="card-time">1 Day ago</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTIVE CHAT INTERFACE (Replaces Hero) -->
+        <div class="chat-interface" id="chatInterface">
+            <div class="chat-scroll-area" id="chatScroll">
+                <!-- Messages go here -->
+            </div>
+
+            <div class="bottom-input-container">
+                <div class="search-card" style="max-width: 700px; padding: 10px 1.5rem;">
+                    <div style="display:flex; gap:10px; align-items:flex-end;">
+                        <textarea id="chatInput" style="min-height: 40px; padding-top: 10px;"
+                            placeholder="Ask follow up..."></textarea>
+                        <button class="send-btn-square" style="height: 40px; width:40px; flex-shrink:0;"
+                            onclick="sendChatMessage()">
+                            <span class="material-icons-round">arrow_upward</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const heroSection = document.getElementById('heroSection');
+        const chatInterface = document.getElementById('chatInterface');
+        const heroInput = document.getElementById('heroInput');
+        const chatInput = document.getElementById('chatInput');
+        const chatScroll = document.getElementById('chatScroll');
+
+        // --- THEME MANAGEMENT ---
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                document.getElementById('darkModeToggle').checked = true;
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.getElementById('darkModeToggle').checked;
+            if (isDark) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Initialize on load
+        initTheme();
+
+        // --- MENUS ---
+        function toggleProfileMenu() {
+            document.getElementById('settingsMenu').classList.remove('show'); // Close others
+            document.getElementById('profileMenu').classList.toggle('show');
+        }
+
+        function toggleSettingsMenu() {
+            document.getElementById('profileMenu').classList.remove('show'); // Close others
+            document.getElementById('settingsMenu').classList.toggle('show');
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function (event) {
+            const pMenu = document.getElementById('profileMenu');
+            const sMenu = document.getElementById('settingsMenu');
+            const pPic = document.querySelector('.profile-pic');
+            const sIcon = document.querySelector('.nav-item[onclick="toggleSettingsMenu()"]'); // A bit hacky selector
+
+            // Profile Close
+            if (pMenu.classList.contains('show') && !pMenu.contains(event.target) && !pPic.contains(event.target)) {
+                pMenu.classList.remove('show');
+            }
+            // Settings Close
+            if (sMenu.classList.contains('show') && !sMenu.contains(event.target) && sIcon && !sIcon.contains(event.target)) {
+                sMenu.classList.remove('show');
+            }
+        });
+
+        // --- CHAT LOGIC ---
+        function switchToChat() {
+            heroSection.style.display = 'none';
+            chatInterface.style.display = 'flex';
+        }
+
+        async function handleAsk(text, isHero) {
+            if (!text.trim()) return;
+
+            if (isHero) {
+                switchToChat();
+            }
+
+            // Append User Message
+            appendMsg(text, 'user');
+
+            if (isHero) {
+                heroInput.value = '';
+            } else {
+                chatInput.value = '';
+            }
+
+            // Append Loading
+            const loadingId = 'load-' + Date.now();
+            appendLoading(loadingId);
+
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: text })
+                });
+                const data = await response.json();
+
+                document.getElementById(loadingId).remove();
+
+                if (data.error) appendMsg("Error: " + data.error, 'ai');
+                else {
+                    const dept = data.metrics ? data.metrics.department : null;
+                    appendMsg(data.answer, 'ai', dept);
+                }
+
+            } catch (e) {
+                if (document.getElementById(loadingId)) document.getElementById(loadingId).remove();
+                appendMsg("Connection error.", 'ai');
+            }
+        }
+
+        function sendHeroMessage() {
+            handleAsk(heroInput.value, true);
+        }
+
+        function sendChatMessage() {
+            handleAsk(chatInput.value, false);
+        }
+
+        function appendMsg(text, role, department = null) {
+            const container = document.createElement('div');
+            container.className = `msg-container ${role}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = `avatar-sm ${role === 'user' ? 'user-av' : 'ai-av'}`;
+            avatar.innerHTML = role === 'user' ? '{{ username[0]|upper }}' : '<span class="material-icons-round" style="font-size:1.2rem;">auto_awesome</span>';
+
+            const contentWrapper = document.createElement('div');
+            contentWrapper.style.display = 'flex';
+            contentWrapper.style.flexDirection = 'column';
+            contentWrapper.style.gap = '5px';
+
+            if (role === 'ai' && department) {
+                const badge = document.createElement('span');
+                badge.style.alignSelf = 'flex-start';
+                badge.style.fontSize = '0.7rem';
+                badge.style.fontWeight = '600';
+                badge.style.color = 'var(--purple)';
+                badge.style.background = '#edeaff'; // This might need a dark mode variable if too bright
+                badge.style.padding = '2px 8px';
+                badge.style.borderRadius = '10px';
+                badge.style.marginBottom = '2px';
+                badge.innerText = `🧠 ${department} Agent`;
+                contentWrapper.appendChild(badge);
+            }
+
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble';
+            bubble.innerHTML = text.replace(/\n/g, '<br>');
+
+            contentWrapper.appendChild(bubble);
+
+            if (role === 'user') {
+                container.appendChild(bubble);
+                container.appendChild(avatar);
+            } else {
+                container.appendChild(avatar);
+                container.appendChild(contentWrapper);
+            }
+
+            chatScroll.appendChild(container);
+            chatScroll.scrollTop = chatScroll.scrollHeight;
+        }
+
+        function appendLoading(id) {
+            const container = document.createElement('div');
+            container.id = id;
+            container.className = `msg-container ai`;
+
+            const avatar = document.createElement('div');
+            avatar.className = `avatar-sm ai-av`;
+            avatar.innerHTML = '<span class="material-icons-round" style="font-size:1.2rem;">auto_awesome</span>';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble';
+            bubble.style.color = 'var(--text-sub)'; // Updated
+            bubble.innerText = 'Thinking...';
+
+            container.appendChild(avatar);
+            container.appendChild(bubble);
+            chatScroll.appendChild(container);
+            chatScroll.scrollTop = chatScroll.scrollHeight;
+        }
+
+        // Enter key support
+        heroInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendHeroMessage(); } });
+        chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(); } });
+
+    </script>
+</body>
+
+</html>
