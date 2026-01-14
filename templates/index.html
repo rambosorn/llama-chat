@@ -7,7 +7,12 @@
     <title>ខេមបត (Cambot)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Khmer Brand Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap"
         rel="stylesheet">
     <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -59,32 +64,140 @@
 
         /* --- SIDEBAR --- */
         aside {
-            width: 80px;
+            width: 260px;
+            /* Expanded by default */
             background-color: var(--bg-sidebar);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: 1.5rem 0;
+            align-items: flex-start;
+            /* Left align items */
+            padding: 1.5rem 1rem;
             border-right: 1px solid var(--border);
             flex-shrink: 0;
-            transition: background-color 0.3s, border-color 0.3s;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s;
             z-index: 50;
+            overflow: hidden;
+            /* Hide overflow when collapsing */
+            min-width: 260px;
+            /* Force minimum width to prevent squashing */
+        }
+
+        /* Sidebar Header (Brand + Collapse) */
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+
+        .collapse-btn {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            display: flex;
+            /* Visible on desktop sidebar */
+        }
+
+        .collapse-btn:hover {
+            background: var(--border);
+        }
+
+        /* Desktop Toggle (Main) - Only show when collapsed */
+        .desktop-toggle-btn {
+            display: none;
+            /* Hidden by default (sidebar open) */
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+        }
+
+        /* Show toggle when sidebar is collapsed */
+        body.sidebar-collapsed .desktop-toggle-btn {
+            display: flex;
+        }
+
+        /* CSS Block Removed by User Request */
+
+        /* --- DESKTOP MINI RAIL (ChatGPT-like) --- */
+        @media (min-width: 1025px) {
+
+            /* When collapsed: keep a slim icon rail */
+            body.sidebar-collapsed aside {
+                width: 72px;
+                min-width: 72px;
+                padding: 1rem 0.5rem;
+                opacity: 1;
+                border-right: 1px solid var(--border);
+            }
+
+            /* Hide text labels when collapsed */
+            body.sidebar-collapsed aside .label,
+            body.sidebar-collapsed aside .brand-text,
+            /* Hide brand text */
+            body.sidebar-collapsed aside .spacer>div:first-child,
+            /* "Today" heading */
+            body.sidebar-collapsed aside .nav-item span:not(.material-icons-round),
+            body.sidebar-collapsed aside .nav-item div[style*="flex-direction: column"] {
+                display: none !important;
+            }
+
+            /* Make nav items centered */
+            body.sidebar-collapsed aside .nav-item {
+                justify-content: center;
+                padding: 0;
+                height: 44px;
+            }
+
+            body.sidebar-collapsed aside .nav-item span.material-icons-round {
+                margin-right: 0;
+            }
+
+            /* Keep profile avatar centered */
+            body.sidebar-collapsed aside .profile-pic {
+                margin: 0;
+            }
+
+            /* Popover menus shift closer because sidebar is slimmer */
+            body.sidebar-collapsed .popover-menu {
+                left: 84px;
+            }
+
+            /* Rotate collapse button when collapsed to indicate 'Expand' */
+            body.sidebar-collapsed .collapse-btn span {
+                transform: rotate(180deg);
+            }
         }
 
         /* --- MOBILE NAV --- */
         .mobile-header {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: var(--bg-body);
+            padding: 10px 16px;
+            background-color: var(--bg-body);
             border-bottom: 1px solid var(--border);
-            z-index: 40;
             align-items: center;
-            padding: 0 1rem;
             justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        /* Smooth drawer gestures */
+        @media (max-width: 1024px) {
+            aside {
+                will-change: transform;
+                touch-action: pan-y;
+            }
         }
 
         .menu-btn {
@@ -102,6 +215,7 @@
             font-weight: 700;
             font-size: 1.1rem;
             color: var(--text-main);
+            font-family: 'Google Sans', sans-serif;
         }
 
         .overlay {
@@ -122,7 +236,40 @@
             opacity: 1;
         }
 
-        @media (max-width: 768px) {
+        /* --- TOGGLE BUTTONS --- */
+        .mobile-close-btn {
+            display: none;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: var(--text-sub);
+        }
+
+
+
+
+
+        aside.collapsed {
+            width: 0;
+            padding: 0;
+            opacity: 0;
+            overflow: hidden;
+            border: none;
+        }
+
+
+
+        @media (max-width: 1024px) {
+            .desktop-toggle-btn {
+                display: none;
+                /* Hide desktop toggle on mobile */
+            }
+
+            .mobile-close-btn {
+                display: flex;
+                /* Show close X on drawer */
+            }
+
             body {
                 flex-direction: column;
             }
@@ -132,69 +279,97 @@
                 top: 0;
                 left: 0;
                 bottom: 0;
-                width: 260px;
-                /* Wider drawer like GPT */
+                width: 85%;
+                /* Wider drawer, almost full screen like GPT mobile */
+                max-width: 320px;
                 transform: translateX(-100%);
-                transition: transform 0.3s ease;
-                align-items: flex-start;
-                /* Align left for drawer feel */
-                padding: 1.5rem;
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                align-items: stretch;
+                /* Stretch items to full width */
+                padding: 1rem;
+                background-color: #171717;
+                /* Deep Dark for Mobile Drawer */
+                color: #ececec;
+                border-right: 1px solid #333;
+                z-index: 100;
+                /* Ensure on top */
+            }
+
+            /* Hide Desktop Header/Collapse inside Mobile Drawer */
+            .sidebar-header,
+            .collapse-btn {
+                display: none !important;
+            }
+
+            aside .brand-logo {
+                display: none;
+                /* Hide default logo in drawer, use header instead */
             }
 
             aside.open {
                 transform: translateX(0);
-                box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
-            }
-
-            /* Adjust internal sidebar items for drawer look */
-            aside .brand-logo {
-                margin-bottom: 2rem;
-                margin-left: 0.5rem;
+                box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
             }
 
             aside .nav-item {
                 width: 100%;
                 justify-content: flex-start;
-                padding-left: 1rem;
+                padding: 12px;
                 border-radius: 8px;
+                color: #ececec;
+                /* Light text */
+                margin-bottom: 5px;
+            }
+
+            aside .nav-item:hover {
+                background-color: #2f2f2f;
+                color: white;
+            }
+
+            aside .nav-item.active {
+                background-color: #2f2f2f;
+                /* Dark active state */
+                color: white;
+                box-shadow: none;
             }
 
             aside .nav-item span {
-                margin-right: 1rem;
+                margin-right: 12px;
             }
 
-            /* Show Mobile Header */
+            /* Mobile Header Updates */
             .mobile-header {
                 display: flex;
+                background-color: var(--bg-body);
+                border-bottom: 1px solid var(--border);
+                align-items: center;
+                height: 50px;
+                /* Slightly thinner */
             }
 
-            /* Main Content Pushed down */
-            main {
-                margin-top: 60px;
-                height: calc(100vh - 60px);
+            .mobile-brand {
+                font-size: 1rem;
+                font-weight: 600;
+                opacity: 0.9;
             }
 
-            /* Popovers fix for mobile drawer */
+            /* Hide settings/profile popovers inside drawer effectively */
             .popover-menu {
-                left: 20px;
-                width: 220px;
-                position: relative;
-                /* Inside flow */
-                box-shadow: none;
-                background: rgba(0, 0, 0, 0.05);
-                /* Subtle nested bg */
+                position: static;
+                /* Stack inside drawer */
+                width: 100%;
+                background: #2f2f2f;
                 border: none;
-                margin-top: 5px;
+                margin-top: 10px;
+                box-shadow: none;
             }
 
-            #profileMenu {
-                bottom: auto;
-                top: 0;
+            .popover-menu .menu-item {
+                color: #ececec;
             }
 
-            #settingsMenu {
-                bottom: auto;
-                top: 0;
+            .popover-menu .menu-item:hover {
+                background: #444;
             }
         }
 
@@ -215,15 +390,25 @@
         .nav-item {
             display: flex;
             align-items: center;
-            justify-content: center;
-            width: 45px;
+            justify-content: flex-start;
+            /* Left align */
+            width: 100%;
+            /* Fill sidebar */
             height: 45px;
-            border-radius: 12px;
+            border-radius: 8px;
+            /* Softer radius */
             color: var(--text-sub);
             cursor: pointer;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
+            /* Tighter spacing */
             transition: all 0.2s;
             text-decoration: none;
+            padding: 0 12px;
+            /* Add internal padding */
+        }
+
+        .nav-item span.material-icons-round {
+            margin-right: 12px;
         }
 
         .nav-item:hover {
@@ -419,18 +604,18 @@
             margin-bottom: 3rem;
         }
 
-        .avatar-lg {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #a29bfe, #6c5ce7);
-            border-radius: 50%;
-            margin: 0 auto 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: white;
-            box-shadow: 0 10px 25px rgba(108, 92, 231, 0.2);
+        /* Mobile specific adjustments to prevent header overlap */
+        @media (max-width: 1024px) {
+            .hero-section {
+                padding-top: 80px !important;
+                /* clear fixed/sticky header */
+                justify-content: flex-start;
+                /* don't vertically center strict */
+            }
+
+            .greeting-area {
+                margin-top: 2rem;
+            }
         }
 
         h1 {
@@ -650,37 +835,49 @@
         <button class="menu-btn" onclick="toggleMobileMenu()">
             <span class="material-icons-round" style="font-size: 28px;">menu</span>
         </button>
-        <div class="mobile-brand">Cambot AI 🤖</div>
-        <div style="width: 28px;"></div> <!-- Spacer for balance -->
+        <div class="mobile-brand">ខេមបត 🤖</div>
+        <button class="menu-btn" onclick="window.location.reload()">
+            <span class="material-icons-round" style="font-size: 28px;">add</span> <!-- Use Plus for New Chat -->
+        </button>
     </div>
 
     <!-- Dark Overlay -->
     <div class="overlay" id="sidebarOverlay" onclick="toggleMobileMenu()"></div>
 
     <aside id="sidebar">
-        <div class="brand-logo">
-            <span class="material-icons-round">auto_awesome</span>
+        <!-- Sidebar Header -->
+        <div class="sidebar-header">
+            <div class="brand-logo" style="margin-bottom: 0; display:flex; align-items:center;">
+                <span class="material-icons-round">auto_awesome</span>
+                <span class="brand-text"
+                    style="font-weight:700; font-size:1.1rem; margin-left:8px; white-space:nowrap; font-family: 'Google Sans', sans-serif;">ខេមបត</span>
+            </div>
+            <!-- Collapse Button -->
+            <button class="collapse-btn" onclick="toggleDesktopSidebar()">
+                <span class="material-icons-round">first_page</span>
+            </button>
         </div>
 
+        <!-- NEW CHAT (Top) -->
         <a href="/" class="nav-item active">
             <span class="material-icons-round">add</span>
+            <span class="label" style="font-size: 0.9rem;">New chat</span>
         </a>
 
-        <div class="spacer"></div>
+        <!-- Search and History removed by user request -->
 
-        <div class="nav-item">
-            <span class="material-icons-round">help_outline</span>
-        </div>
+        <div style="margin-top: auto;"></div> <!-- Push content to bottom -->
 
-        <!-- Settings Trigger -->
+        <!-- Settings -->
         <div class="nav-item" onclick="toggleSettingsMenu()">
             <span class="material-icons-round">settings</span>
+            <span class="label">Settings</span>
         </div>
-        <!-- Settings Modal (Popover) -->
+
         <div id="settingsMenu" class="popover-menu">
             <div class="menu-header">Settings</div>
             <div class="toggle-row">
-                <span>Dark Mode 🌙</span>
+                <span>Night Mode</span>
                 <label class="switch">
                     <input type="checkbox" id="darkModeToggle" onchange="toggleTheme()">
                     <span class="slider"></span>
@@ -688,16 +885,20 @@
             </div>
         </div>
 
-        <div style="position: relative;">
-            <div class="profile-pic" onclick="toggleProfileMenu()">{{ username[0]|upper }}</div>
-            <div id="profileMenu" class="popover-menu">
-                <div class="menu-header">
-                    {{ username }}
-                    <div style="font-size: 0.75rem; color: var(--text-sub); font-weight: 400;">Personal Plan</div>
+        <!-- BOTTOM AREA: User Profile -->
+        <div style="width: 100%; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+            <div class="nav-item" onclick="toggleProfileMenu()" style="justify-content: flex-start; gap: 10px;">
+                <!-- User Avatar -->
+                <div class="profile-pic" style="width: 32px; height: 32px; margin: 0; font-size: 0.8rem;">{{
+                    username[0]|upper }}</div>
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-weight: 600; font-size: 0.9rem;">{{ username }}</span>
                 </div>
+            </div>
+
+            <div id="profileMenu" class="popover-menu">
                 <a href="/logout" class="menu-item logout">
-                    <span class="material-icons-round" style="font-size: 1.2rem;">logout</span>
-                    Log Out
+                    <span class="material-icons-round">logout</span> Log out
                 </a>
             </div>
         </div>
@@ -707,7 +908,6 @@
         <!-- INITIAL HERO SCREEN -->
         <div class="hero-section" id="heroSection">
             <div class="greeting-area">
-                <div class="avatar-lg">{{ username[0]|upper }}</div>
                 <h1>Good Evening, {{ username }}</h1>
                 <p class="subtitle">Enter a simple prompt to find what’s on your mind today?</p>
             </div>
@@ -842,6 +1042,154 @@
             } else {
                 overlay.classList.remove('show');
             }
+        }
+
+        // Close sidebar when clicking a nav item (UX)
+        document.querySelectorAll('aside .nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) { // Only on mobile
+                    toggleMobileMenu();
+                }
+            });
+        });
+
+        // --- SWIPE GESTURES FOR MOBILE DRAWER ---
+        (function enableSwipeDrawer() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (!sidebar || !overlay) return;
+
+            let startX = 0;
+            let startY = 0;
+            let currentX = 0;
+            let dragging = false;
+            let startedFromEdge = false;
+
+            function isMobile() {
+                return window.innerWidth <= 1024;
+            }
+
+            function openDrawer() {
+                if (!sidebar.classList.contains('open')) toggleMobileMenu();
+            }
+
+            function closeDrawer() {
+                if (sidebar.classList.contains('open')) toggleMobileMenu();
+            }
+
+            // Swipe close when drawer is open
+            sidebar.addEventListener('touchstart', (e) => {
+                if (!isMobile()) return;
+                if (!sidebar.classList.contains('open')) return;
+
+                const t = e.touches[0];
+                startX = t.clientX;
+                startY = t.clientY;
+                currentX = startX;
+                dragging = true;
+            }, { passive: true });
+
+            sidebar.addEventListener('touchmove', (e) => {
+                if (!isMobile()) return;
+                if (!dragging) return;
+
+                const t = e.touches[0];
+                currentX = t.clientX;
+
+                const dx = currentX - startX;
+                const dy = t.clientY - startY;
+
+                // Ignore mostly-vertical swipes
+                if (Math.abs(dy) > Math.abs(dx)) return;
+
+                // Only allow swipe left to close
+                if (dx < 0) {
+                    sidebar.style.transition = 'none';
+                    sidebar.style.transform = `translateX(${dx}px)`; // dx is negative
+                    overlay.style.opacity = String(Math.max(0, 1 - Math.abs(dx) / 240));
+                }
+            }, { passive: true });
+
+            sidebar.addEventListener('touchend', () => {
+                if (!isMobile()) return;
+                if (!dragging) return;
+
+                const dx = currentX - startX;
+                dragging = false;
+
+                // reset styles
+                sidebar.style.transition = '';
+                sidebar.style.transform = '';
+                overlay.style.opacity = '';
+
+                // If swiped left enough, close
+                if (dx < -80) closeDrawer();
+            });
+
+            // Swipe from LEFT EDGE to open (when closed)
+            document.addEventListener('touchstart', (e) => {
+                if (!isMobile()) return;
+                if (sidebar.classList.contains('open')) return;
+
+                const t = e.touches[0];
+                startX = t.clientX;
+                startY = t.clientY;
+                currentX = startX;
+                dragging = true;
+
+                // Only start if touch begins near left edge
+                startedFromEdge = startX <= 20;
+            }, { passive: true });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!isMobile()) return;
+                if (!dragging || !startedFromEdge) return;
+                if (sidebar.classList.contains('open')) return;
+
+                const t = e.touches[0];
+                currentX = t.clientX;
+
+                const dx = currentX - startX;
+                const dy = t.clientY - startY;
+
+                if (Math.abs(dy) > Math.abs(dx)) return;
+
+                // drag drawer in as you swipe right
+                if (dx > 0) {
+                    const maxPull = Math.min(dx, 280);
+                    sidebar.style.transition = 'none';
+                    sidebar.style.transform = `translateX(${-100 + (maxPull / 280) * 100}%)`;
+                    overlay.classList.add('show');
+                    overlay.style.opacity = String(Math.min(1, maxPull / 280));
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchend', () => {
+                if (!isMobile()) return;
+                if (!dragging) return;
+
+                const dx = currentX - startX;
+
+                // reset styles
+                sidebar.style.transition = '';
+                sidebar.style.transform = '';
+                overlay.style.opacity = '';
+
+                // Open if swiped right enough from edge
+                if (startedFromEdge && dx > 80) {
+                    openDrawer();
+                } else {
+                    // if we were showing overlay during drag, hide it if not opened
+                    if (!sidebar.classList.contains('open')) overlay.classList.remove('show');
+                }
+
+                dragging = false;
+                startedFromEdge = false;
+            });
+        })();
+
+        function toggleDesktopSidebar() {
+            document.body.classList.toggle('sidebar-collapsed');
         }
 
         // --- CHAT LOGIC ---

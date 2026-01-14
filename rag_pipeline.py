@@ -62,15 +62,22 @@ def ask_techcorp_ai(question):
         
     retrieval_time = time.time() - start_time
     
-    if not results:
+    # Filter results by relevance score (Anti-Hallucination)
+    # Adjustment: Temporarily disabled strict filtering (threshold -10.0)
+    # to ensure results are returned until distance metric is calibrated.
+    
+    valid_results = [r for r in results if r['score'] >= -10.0]
+    
+    if not valid_results:
+        print("⚠️ No relevant documents found.")
         return {
-            "answer": f"I checked the records for {department} but couldn't find specific information.",
+            "answer": f"I checked the available records for {department}, but couldn't find information relevant enough to your query. (Confidence too low)",
             "sources": [],
             "metrics": {"retrieval_time": retrieval_time, "generation_time": 0}
         }
 
     # 3. AUGMENT
-    context_text = "\n\n".join([f"doc: {r['source']} (Dept: {r.get('source_dept', 'Unknown')}) \n content: {r['content']}" for r in results])
+    context_text = "\n\n".join([f"doc: {r['source']} (Dept: {r.get('source_dept', 'Unknown')}) \n content: {r['content']}" for r in valid_results])
     
     # Custom System Prompts per Persona
     personas = {
@@ -78,7 +85,7 @@ def ask_techcorp_ai(question):
         "Sales_Marketing": "You are an energetic Sales Director. Focus on growth, numbers, and customer satisfaction.",
         "Account_Finance": "You are a precise Accountant. Be exact with numbers and budget details.",
         "IT": "You are a helpful IT Support Specialist. Explain technical concepts simply.",
-        "Executive": "You are the Chief Strategy Officer. You have access to ALL files. Synthesize information from different departments (e.g., comparing Finance profits with IT budgets) to answer complex queries.",
+        "Executive": "You are the Chief Strategy Officer. You have access to ALL files. Synthesize information from different departments.",
         "General": "You are a helpful Corporate Assistant."
     }
     
@@ -88,6 +95,8 @@ def ask_techcorp_ai(question):
     {system_persona}
     
     You are an intelligent consultant. Your goal is not just to answer, but to GUIDE the user.
+    
+    STRICT RULE: Answer ONLY using the provided CONTEXT. Do not use outside knowledge.
     
     Use the following CONTEXT to answer the QUESTION.
     
@@ -120,9 +129,12 @@ def ask_techcorp_ai(question):
     try:
         model_name = "llama3.2" 
         
-        response = ollama.chat(model=model_name, messages=[
-            {'role': 'user', 'content': prompt},
-        ])
+        # TEMPERATURE 0.1 = Deterministic / Factual
+        response = ollama.chat(
+            model=model_name, 
+            messages=[{'role': 'user', 'content': prompt}],
+            options={'temperature': 0.1} 
+        )
         
         answer = response['message']['content']
         gen_time = time.time() - start_gen
@@ -133,9 +145,9 @@ def ask_techcorp_ai(question):
         
         return {
             "answer": answer,
-            "sources": [r['source'] for r in results],
+            "sources": [r['source'] for r in valid_results],
             "metrics": {
-                "department": department, # Return dept for UI
+                "department": department,
                 "retrieval_time": round(retrieval_time, 2), 
                 "generation_time": round(gen_time, 2),
                 "total_time": round(retrieval_time + gen_time, 2)
