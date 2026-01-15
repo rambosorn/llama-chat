@@ -40,93 +40,93 @@ def classify_intent(question):
         return "General"
 
 def ask_techcorp_ai(question):
-    print(f"\n🤖 USER ASKS: '{question}'")
-    print("------------------------------------------------")
-    
-    start_time = time.time()
-    
-    # 1. ROUTE
-    department = classify_intent(question)
-    print(f"👉 ROUTED TO: {department}")
-    
-    # 2. RETRIEVE (Scoped by Department)
-    # Executive searches EVERYTHING. General searches EVERYTHING (or just general folder? let's say everything for general fallback)
-    # Others are Scoped.
-    
-    if department in ["Executive", "General"]:
-        print(f"🔍 Retrieving context from 'GLOBAL' Cabinet (Access Level: {department})...")
-        results = search_documents(question, n_results=15) # Fetch more for complex queries
-    else:
-        print(f"🔍 Retrieving context from '{department}' Cabinet...")
-        results = search_documents(question, n_results=3, where={"department": department})
-        
-    retrieval_time = time.time() - start_time
-    
-    # Filter results by relevance score (Anti-Hallucination)
-    # Adjustment: Temporarily disabled strict filtering (threshold -10.0)
-    # to ensure results are returned until distance metric is calibrated.
-    
-    valid_results = [r for r in results if r['score'] >= -10.0]
-    
-    if not valid_results:
-        print("⚠️ No relevant documents found.")
-        return {
-            "answer": f"I checked the available records for {department}, but couldn't find information relevant enough to your query. (Confidence too low)",
-            "sources": [],
-            "metrics": {"retrieval_time": retrieval_time, "generation_time": 0}
-        }
-
-    # 3. AUGMENT
-    context_text = "\n\n".join([f"doc: {r['source']} (Dept: {r.get('source_dept', 'Unknown')}) \n content: {r['content']}" for r in valid_results])
-    
-    # Custom System Prompts per Persona
-    personas = {
-        "HR_Law": "You are a rigid but helpful HR & Legal Officer. Cite specific policies.",
-        "Sales_Marketing": "You are an energetic Sales Director. Focus on growth, numbers, and customer satisfaction.",
-        "Account_Finance": "You are a precise Accountant. Be exact with numbers and budget details.",
-        "IT": "You are a helpful IT Support Specialist. Explain technical concepts simply.",
-        "Executive": "You are the Chief Strategy Officer. You have access to ALL files. Synthesize information from different departments.",
-        "General": "You are a helpful Corporate Assistant."
-    }
-    
-    system_persona = personas.get(department, personas['General'])
-    
-    prompt = f"""
-    {system_persona}
-    
-    You are an intelligent consultant. Your goal is not just to answer, but to GUIDE the user.
-    
-    STRICT RULE: Answer ONLY using the provided CONTEXT. Do not use outside knowledge.
-    
-    Use the following CONTEXT to answer the QUESTION.
-    
-    Format your response exactly like this:
-    
-    **🎯 Answer:**
-    [Direct, factual answer to the question based on the documents.]
-    
-    **💡 Recommendation:**
-    [Provide 1-2 actionable steps the user should take. Be proactive.]
-    
-    **⚖️ Logical Reasoning:**
-    [Explain WHY you recommend this. Cite best practices, logic, or specific constraints from the documents.]
-    
-    If the answer is not in the documents, say "I don't know based on the available records."
-    
-    CONTEXT:
-    {context_text}
-    
-    QUESTION: 
-    {question}
-    
-    ANSWER:
-    """
-    
-    print("\n🧠 GENERATING ANSWER...")
-    
-    # 4. GENERATE
-    start_gen = time.time()
     try:
+        print(f"\n🤖 USER ASKS: '{question}'")
+        print("------------------------------------------------")
+        
+        start_time = time.time()
+        
+        # 1. ROUTE
+        department = classify_intent(question)
+        print(f"👉 ROUTED TO: {department}")
+        
+        # 2. RETRIEVE (Scoped by Department)
+        # Executive searches EVERYTHING. General searches EVERYTHING (or just general folder? let's say everything for general fallback)
+        # Others are Scoped.
+        
+        if department in ["Executive", "General"]:
+            print(f"🔍 Retrieving context from 'GLOBAL' Cabinet (Access Level: {department})...")
+            results = search_documents(question, n_results=15) # Fetch more for complex queries
+        else:
+            print(f"🔍 Retrieving context from '{department}' Cabinet...")
+            results = search_documents(question, n_results=3, where={"department": department})
+            
+        retrieval_time = time.time() - start_time
+        
+        # Filter results by relevance score (Anti-Hallucination)
+        # Adjustment: Temporarily disabled strict filtering (threshold -10.0)
+        # to ensure results are returned until distance metric is calibrated.
+        
+        valid_results = [r for r in results if r['score'] >= -10.0]
+        
+        if not valid_results:
+            print("⚠️ No relevant documents found.")
+            return {
+                "answer": f"I checked the available records for {department}, but couldn't find information relevant enough to your query. (Confidence too low)",
+                "sources": [],
+                "metrics": {"retrieval_time": retrieval_time, "generation_time": 0}
+            }
+    
+        # 3. AUGMENT
+        context_text = "\n\n".join([f"doc: {r['source']} (Dept: {r.get('source_dept', 'Unknown')}) \n content: {r['content']}" for r in valid_results])
+        
+        # Custom System Prompts per Persona
+        personas = {
+            "HR_Law": "You are a rigid but helpful HR & Legal Officer. Cite specific policies.",
+            "Sales_Marketing": "You are an energetic Sales Director. Focus on growth, numbers, and customer satisfaction.",
+            "Account_Finance": "You are a precise Accountant. Be exact with numbers and budget details.",
+            "IT": "You are a helpful IT Support Specialist. Explain technical concepts simply.",
+            "Executive": "You are the Chief Strategy Officer. You have access to ALL files. Synthesize information from different departments.",
+            "General": "You are a helpful Corporate Assistant."
+        }
+        
+        system_persona = personas.get(department, personas['General'])
+        
+        prompt = f"""
+        {system_persona}
+        
+        You are an intelligent consultant. Your goal is not just to answer, but to GUIDE the user.
+        
+        STRICT RULE: Answer ONLY using the provided CONTEXT. Do not use outside knowledge.
+        
+        Use the following CONTEXT to answer the QUESTION.
+        
+        Format your response exactly like this:
+        
+        **🎯 Answer:**
+        [Direct, factual answer to the question based on the documents.]
+        
+        **💡 Recommendation:**
+        [Provide 1-2 actionable steps the user should take. Be proactive.]
+        
+        **⚖️ Logical Reasoning:**
+        [Explain WHY you recommend this. Cite best practices, logic, or specific constraints from the documents.]
+        
+        If the answer is not in the documents, say "I don't know based on the available records."
+        
+        CONTEXT:
+        {context_text}
+        
+        QUESTION: 
+        {question}
+        
+        ANSWER:
+        """
+        
+        print("\n🧠 GENERATING ANSWER...")
+        
+        # 4. GENERATE
+        start_gen = time.time()
         model_name = "llama3.2" 
         
         # TEMPERATURE 0.1 = Deterministic / Factual
@@ -153,11 +153,13 @@ def ask_techcorp_ai(question):
                 "total_time": round(retrieval_time + gen_time, 2)
             }
         }
-        
+            
     except Exception as e:
+        import traceback
         print(f"Error: {e}")
+        traceback.print_exc()
         return {
-            "answer": "Error generating response.",
+            "answer": f"Error generating response: {str(e)}",
             "sources": [],
             "metrics": {"error": str(e)}
         }
